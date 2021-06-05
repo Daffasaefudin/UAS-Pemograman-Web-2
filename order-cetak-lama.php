@@ -4,16 +4,16 @@ if(!isset($_SESSION['nama_pengguna'])){
 	echo "<script>location.href='login.php'</script>";
 }
  // Define relative path from this script to mPDF
- 
- $nama_dokumen='Data Service '; //Beri nama file PDF hasil.
+
+ $nama_dokumen='BUKTI PEMESANAN'; //Beri nama file PDF hasil.
 define('_MPDF_PATH','MPDF57/');
 include(_MPDF_PATH . "mpdf.php");
 $mpdf=new mPDF('utf-8', 'A4'); // Create new mPDF Document
 
 
- 
+
 //Beginning Buffer to save PHP variables and HTML tags
-ob_start(); 
+ob_start();
 ?>
 
 <!--sekarang Tinggal Codeing seperti biasanya. HTML, CSS, PHP tidak masalah.-->
@@ -23,22 +23,21 @@ ob_start();
 $host="localhost"; //isi dengan host anda. contoh "localhost"
 $user="root"; //isi dengan username mysql anda. contoh "root"
 $password=""; //isi dengan password mysql anda. jika tidak ada, biarkan kosong.
-$database="db_dimas";//isi nama database dengan tepat.
-mysql_connect($host,$user,$password);
-mysql_select_db($database);
+$database="db_order_food";//isi nama database dengan tepat.
+$conn = mysqli_connect($host,$user,$password,$database);
 
 $id_pembelian = $_GET['id'];
 //  echo $id_pembelian;
 ?>
 
 <?php
-$query=mysql_query("SELECT * FROM 213_pembelian JOIN 213_mekanik ON 213_pembelian.id_mekanik=213_mekanik.id_mekanik 
-JOIN 213_sparepart ON 213_pembelian.id_sparepart=213_sparepart.id_sparepart 
-JOIN 213_pelanggan ON 213_pelanggan.id_pelanggan = 213_pembelian.id_pelanggan
-where 213_pembelian.id_pembelian = $id_pembelian
-ORDER BY id_pembelian ASC");
-$nm_pelanggan = mysql_fetch_array($query);
-$service + mysql_fetch_array($query);
+$query=mysqli_query($conn,"SELECT * FROM tb_order
+		INNER JOIN tb_restoran ON tb_order.id_restoran=tb_restoran.id_restoran
+		INNER JOIN tb_food ON tb_order.id_food=tb_food.id_food
+		WHERE id_order='".$id_order."'
+		ORDER BY tb_order.id_order DESC");
+$nm_order= mysqli_fetch_array($query);
+$service = mysqli_fetch_array($query);
 // print($nm_pelanggan['nama']);
 ?>
 
@@ -46,7 +45,7 @@ $service + mysql_fetch_array($query);
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>PDF INVOICE</title>
+    <title>PRINT BUKTI PEMESANAN</title>
     <link rel="stylesheet" href="style.css" media="all" />
     <style>
 
@@ -55,15 +54,21 @@ a {
   text-decoration: underline;
 }
 
+.clearfix:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
 body {
   position: relative;
-  width: 21cm;  
+  width: 21cm;
   /* height: 29.7cm;  */
-  margin: 0 auto; 
+  margin: 0 auto;
   color: #001028;
-  background: #FFFFFF; 
-  font-family: Arial, sans-serif; 
-  font-size: 12px; 
+  background: #FFFFFF;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
   font-family: Arial;
 }
 
@@ -74,12 +79,13 @@ header {
 
 #logo {
   text-align: center;
-  margin-bottom: 10px;
+  width: 90px;
+  float: right;
 }
 
 #logo img {
   width: 90px;
-}
+
 
 h1 {
   color: #00000;
@@ -113,7 +119,7 @@ h4 {
 
 #project div,
 #company div {
-  white-space: nowrap;        
+  white-space: nowrap;
 }
 
 table {
@@ -128,14 +134,14 @@ thead {background-color: #000080;}
 table th,
 table td {
   text-align: center;
-  border: 1px solid black;
-  
+  border: 0.5px solid black;
+
 }
 
 table th {
-  border: 1px solid black;
+  border: 0.5px solid black;
   padding: 5px 20px;
-  white-space: nowrap;        
+  white-space: nowrap;
   font-weight: normal;
   background-color: #4682B4;
   color: white;
@@ -174,69 +180,81 @@ table td.grand {
     </style>
   </head>
   <body>
-      <h1>DIMAS MOTOR</h1>
-        <div><i>WE CARE YOUR CARS</i></div>
-        <div id="company"><h2>INVOICE</h2><div><span><b>DATE  :<b></span> <?php date_default_timezone_set("Asia/Jakarta"); echo $date = date('Y-m-d |  H:i:s'); ?> </div>
-</div>
+
+      <h1 font-family='algerian'>UNPAM FOOD</h1>
+        <div><i>KAMU LAPAR? KAMI SOLUSINYA</i></div>
         <br>
-        <div>PERUMAHAN MEKAR ASRI 1 BLOK B6/14<br>
+        <div>RUKO BOULVARD BLOK D57 CITRA RAYA <br>
             PANONGAN, BANTEN, TANGERANG 15710
             </div>
-        <div>0851212236363367/08119341510</div>
+        <div>0895331673780/0831882736490</div>
       </div>
       <br>
-        <div><span><b>BILL TO  :<b></span> <?php echo $nm_pelanggan['nama'] ?></div>
-        <div><span>Jenis Kendaraan  :</span> <?php echo $nm_pelanggan['jenis'] ?></div>
-        <div><span>No.Pol :</span>  <?php echo $nm_pelanggan['nopol'] ?></div>
-      
+      <div id="company"><h2>DATA PEMESANAN MAKANAN</h2><div><span><b>HARI/TANGGAL  :<b></span> <?php date_default_timezone_set("Asia/Jakarta"); echo $date = date('Y-m-d |  H:i:s'); ?> </div>
+</div>
+        <div><span><b>NAMA PELANGGAN:<b></span> <?php echo $nm_order['nama_lengkap'] ?></div>
+        <div><span>NAMA RESTORAN:</span> <?php echo $nm_order['id_restoran'] ?></div>
+
+
       <hr>
 
 
     </header>
     <main>
-    <!-- <h4> Surat Perintah Kerja  dengan ( No Service:   )</h4> -->
+    <h4> NOMOR ANTRIAN: <?php echo $nm_order['id_order'] ?></h4>
     <br>
       <table>
         <thead>
           <tr>
-            <th>SPAREPART</th>
-            <th>QTY</th>
-            <th>HARGA</th>
-            <th>JASA</th>
-            <th>TOTAL</th>
-            <th>TANGGAL</th>
+						<th>MAKANAN</th>
+						<th>HARGA</th>
+            <th>ALAMAT PEMESANAN</th>
+            <th>NO HP</th>
+            <th>EMAIL</th>
           </tr>
         </thead>
-        <?php 
-$sql=mysql_query("SELECT * FROM 213_pembelian JOIN 213_mekanik ON 213_pembelian.id_mekanik=213_mekanik.id_mekanik 
-JOIN 213_sparepart ON 213_pembelian.id_sparepart=213_sparepart.id_sparepart 
-JOIN 213_pelanggan ON 213_pelanggan.id_pelanggan = 213_pembelian.id_pelanggan
-where 213_pembelian.id_pembelian = $id_pembelian
-ORDER BY id_pembelian ASC");
-while($data=mysql_fetch_assoc($sql)){
+        <?php
+
+$sql=mysqli_query($conn,"select 213_sparepart.sparepart, 213_pembelian_detail.qty, 213_pembelian_detail.diskon, 213_sparepart.harga from 213_pembelian_detail
+		INNER JOIN 213_sparepart ON 213_pembelian_detail.id_sparepart=213_sparepart.id_sparepart
+		INNER JOIN 213_pembelian ON 213_pembelian_detail.id_pembelian=213_pembelian.id_pembelian
+		WHERE 213_pembelian_detail.id_pembelian='".$id_pembelian."'");
+
+while($data=mysql_fetch_array($sql)){
 ?>
 <tbody>
 <tr>
-<td class='desc'><?php echo $data['sparepart']?></td>
-<td class='unit'><?php echo $data['qty']?></td>
-<td class='qty'><?php echo $data['harga']?></td>
-<td class='total'><?php echo $data['harga_jasa']?></td>
+<td class='unit'><?php echo $data['sparepart']?></td>
+<td class='qty'><?php echo $data['qty']?></td>
+<td class='desc'><?php echo "Rp." . number_format($data['harga'])?></td>
+<td class='desc'><?php echo ($data['diskon']). "%"?></td>
 <td>
-<?php 
+<?php
+    $ds= $data['diskon'];
 	$hs= $data['harga'];
 	$qt= $data['qty'];
-	$hj= $data['harga_jasa'];
-	$tot = ($hs * $qt) + $hj;
-	echo"$tot";
+	$harga_jasa=$data['harga_jasa'];
+	$tot_diskon = ($hs * $qt)*($ds/100);
+	$tot=($hs*$qt) - $tot_diskon;
+	echo "Rp." . number_format("$tot");
 
-			
+
 			?>
 </td>
-<td><?php echo $data['tgl_beli']?></td>
 </tr></tbody>';
 <?php
 }
 ?>
+<tfoot>
+    <tr>
+      <td colspan=4>Harga Jasa</td>
+      <td><?php echo "Rp." . number_format($nm_pelanggan['harga_jasa']) ?></td>
+    </tr>
+    <tr>
+      <td colspan=4>Total Bayar</td>
+      <td><?php echo "Rp.". number_format($nm_pelanggan['harga_jasa']+$total['total_harga']) ?></td>
+    </tr>
+  </tfoot>
 </table>
         <!-- <tbody>
           <tr>
@@ -264,7 +282,7 @@ while($data=mysql_fetch_assoc($sql)){
 </html>
 
 <!--CONTOH Code END-->
- 
+
 <?php
 $html = ob_get_contents(); //Proses untuk mengambil hasil dari OB..
 ob_end_clean();
